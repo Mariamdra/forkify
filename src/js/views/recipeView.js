@@ -4,20 +4,35 @@ import View from "./View.js";
 import icons from "url:../../img/icons.svg"; // Parcel 2
 import { Fraction } from "fractional";
 
-class RecipeView extends View{
+class RecipeView extends View {
   _parentElement = document.querySelector(".recipe");
   _errorMessage = `We couldn not find that recipe. Please try another one!`;
   _message = "";
 
-  
   addHandlerRender(handler) {
     ["hashchange", "load"].forEach((ev) =>
       window.addEventListener(ev, handler)
     );
   }
 
+  addHandlerUpdateServings(handler) {
+    this._parentElement.addEventListener("click", function (e) {
+      const btn = e.target.closest(".btn--update-servings");
+      if (!btn) return;
+      const { updateTo } = btn.dataset;
+      if (+updateTo > 0) handler(+updateTo);
+    });
+  }
+
+  addHandlerAddBookmark(handler) {
+    this._parentElement.addEventListener("click", function (e) {
+      const btn = e.target.closest(".btn--bookmark");
+      if (!btn) return;
+      handler();
+    });
+  }
+
   _generateMarkup() {
-    console.log(this._data);
     return `
         <figure class="recipe__fig">
           <img src="${this._data.image}" alt="${
@@ -46,24 +61,30 @@ class RecipeView extends View{
             }</span>
             <span class="recipe__info-text">servings</span>
             <div class="recipe__info-buttons">
-              <button class="btn--tiny btn--increase-servings">
-                <svg>
-                  <use href="${icons}#icon-minus-circle"></use>
-                </svg>
-              </button>
-              <button class="btn--tiny btn--increase-servings">
-                <svg>
-                  <use href="${icons}#icon-plus-circle"></use>
-                </svg>
-              </button>
+            <button class="btn--tiny btn--update-servings" data-update-to="${
+              this._data.servings - 1
+            }">
+              <svg>
+                <use href="${icons}#icon-minus-circle"></use>
+              </svg>
+            </button>
+            <button class="btn--tiny btn--update-servings" data-update-to="${
+              this._data.servings + 1
+            }">
+              <svg>
+                <use href="${icons}#icon-plus-circle"></use>
+              </svg>
+            </button>
             </div>
           </div>
 
           <div class="recipe__user-generated">
           </div>
-          <button class="btn--round">
+          <button class="btn--round btn--bookmark">
             <svg class="">
-              <use href="${icons}#icon-bookmark-fill"></use>
+              <use href="${icons}#icon-bookmark${
+      this._data.bookmarked ? "-fill" : ""
+    }"></use>
             </svg>
           </button>
         </div>
